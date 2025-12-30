@@ -3,26 +3,54 @@
 namespace App\Http\Requests\Product;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class UpdateUnitRequest extends FormRequest
 {
-    /**
-     * Determine if the user is authorized to make this request.
-     */
     public function authorize(): bool
     {
-        return false;
+        return auth()->check() && auth()->user()->hasPermission('manage-units');
     }
 
-    /**
-     * Get the validation rules that apply to the request.
-     *
-     * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
-     */
     public function rules(): array
     {
+        $unitId = $this->route('unit')->id;
+
         return [
-            //
+            'name' => [
+                'required',
+                'string',
+                'max:255',
+                Rule::unique('units')->ignore($unitId)
+            ],
+            'short_name' => [
+                'required',
+                'string',
+                'max:10',
+                Rule::unique('units')->ignore($unitId)
+            ],
+            'is_active' => 'boolean',
         ];
+    }
+
+    public function messages(): array
+    {
+        return [
+            'name.required' => 'Nama satuan harus diisi',
+            'name.unique' => 'Nama satuan sudah digunakan',
+            'short_name.required' => 'Singkatan satuan harus diisi',
+            'short_name.unique' => 'Singkatan satuan sudah digunakan',
+            'short_name.max' => 'Singkatan maksimal 10 karakter',
+        ];
+    }
+
+    public function validated($key = null, $default = null)
+    {
+        $validated = parent::validated($key, $default);
+
+        // Set default values
+        $validated['is_active'] = $this->boolean('is_active', true);
+
+        return $validated;
     }
 }

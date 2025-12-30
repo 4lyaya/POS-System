@@ -2,7 +2,9 @@
 
 namespace App\Models;
 
+use App\Traits\HasFilter;
 use App\Traits\HasInvoiceNumber;
+use App\Traits\HasSearch;
 use App\Traits\HasStockMutation;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -10,7 +12,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Sale extends Model
 {
-    use HasFactory, SoftDeletes, HasStockMutation, HasInvoiceNumber;
+    use HasFactory, SoftDeletes, HasStockMutation, HasInvoiceNumber, HasSearch, HasFilter;
 
     protected $fillable = [
         'invoice_number',

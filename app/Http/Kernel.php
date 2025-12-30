@@ -66,5 +66,6 @@ class Kernel extends HttpKernel
         'role' => \App\Http\Middleware\CheckRole::class,
         'permission' => \App\Http\Middleware\CheckPermission::class,
         'pos.session' => \App\Http\Middleware\PosSession::class,
+        'user.status' => \App\Http\Middleware\CheckUserStatus::class,
     ];
 }

@@ -2,13 +2,15 @@
 
 namespace App\Models;
 
+use App\Traits\HasFilter;
+use App\Traits\HasSearch;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Product extends Model
 {
-    use HasFactory, SoftDeletes;
+    use HasFactory, SoftDeletes, HasSearch, HasFilter;
 
     protected $fillable = [
         'code',

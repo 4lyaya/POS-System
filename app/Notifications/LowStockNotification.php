@@ -2,53 +2,56 @@
 
 namespace App\Notifications;
 
+use App\Models\Product;
 use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldQueue;
-use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
+use Illuminate\Notifications\Messages\MailMessage;
+use Illuminate\Notifications\Messages\DatabaseMessage;
 
 class LowStockNotification extends Notification
 {
     use Queueable;
 
-    /**
-     * Create a new notification instance.
-     */
-    public function __construct()
+    protected $product;
+    protected $stockLevel;
+
+    public function __construct(Product $product)
     {
-        //
+        $this->product = $product;
+        $this->stockLevel = $product->stock;
     }
 
-    /**
-     * Get the notification's delivery channels.
-     *
-     * @return array<int, string>
-     */
-    public function via(object $notifiable): array
+    public function via($notifiable)
     {
-        return ['mail'];
+        return ['database', 'mail'];
     }
 
-    /**
-     * Get the mail representation of the notification.
-     */
-    public function toMail(object $notifiable): MailMessage
+    public function toMail($notifiable)
     {
         return (new MailMessage)
-                    ->line('The introduction to the notification.')
-                    ->action('Notification Action', url('/'))
-                    ->line('Thank you for using our application!');
+            ->subject('⚠️ Peringatan Stok Menipis - ' . $this->product->name)
+            ->greeting('Halo ' . $notifiable->name . '!')
+            ->line('Stok produk **' . $this->product->name . '** sedang menipis.')
+            ->line('**Detail Produk:**')
+            ->line('- Kode: ' . $this->product->code)
+            ->line('- Stok Saat Ini: ' . $this->stockLevel)
+            ->line('- Stok Minimum: ' . $this->product->min_stock)
+            ->action('Lihat Produk', url('/products/' . $this->product->id))
+            ->line('Silakan lakukan restok segera.')
+            ->salutation('Salam, Sistem POS');
     }
 
-    /**
-     * Get the array representation of the notification.
-     *
-     * @return array<string, mixed>
-     */
-    public function toArray(object $notifiable): array
+    public function toArray($notifiable)
     {
         return [
-            //
+            'title' => 'Stok Menipis: ' . $this->product->name,
+            'message' => 'Stok ' . $this->product->name . ' tersisa ' . $this->stockLevel . ' unit. Minimum: ' . $this->product->min_stock . ' unit.',
+            'icon' => 'fa-exclamation-triangle',
+            'color' => 'warning',
+            'url' => '/products/' . $this->product->id,
+            'product_id' => $this->product->id,
+            'stock_level' => $this->stockLevel,
+            'min_stock' => $this->product->min_stock,
         ];
     }
 }
